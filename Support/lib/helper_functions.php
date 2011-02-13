@@ -62,6 +62,17 @@ function get_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 		$command = '/usr/bin/scp '.(empty($PREFS['cli_options'])?'':$PREFS['cli_options']).' '.
 							 escapeshellarg($PREFS['user'].'@'.$PREFS['host']).':'.escapeshellarg($path).' '.escapeshellarg($TM_FILEPATH);
 	}
+	
+	elseif(0 == strcasecmp('curlftp', $PREFS['protocol'])){
+		
+		//curl -o STSServerInstaller.exe
+		$path = rawurlencode($PREFS['path'].$relative_dir.$TM_FILENAME);
+
+		// FTP command for uploading current file
+		// The slash between the host and the path is a separator and not part of the remote path
+		$command = '/usr/bin/curl '.(empty($PREFS['cli_options'])?'':$PREFS['cli_options']).' '.
+	             ' -o '.escapeshellarg($TM_FILEPATH).' '.escapeshellarg('ftp://'.$PREFS['user'].':'.$PREFS['password'].'@'.$PREFS['host'].'/'.$path);
+	}
 
 	else {
 		notify('Protocol "'.$PREFS['protocol'].'" not known. Please check your remote settings.');
@@ -73,9 +84,11 @@ function get_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 	$result = shell_exec($command);
 	
 	// Error occured
-	if (!empty($result)) {
-	  notify('Error ('.$PREFS['protocol'].'): '.$result."\nCommand being used:\n".$command, TRUE);
-	  return;
+	if($PREFS['protocol'] != 'curlftp'){
+		if (!empty($result)) {
+		  notify('Error ('.$PREFS['protocol'].'): '.$result."\nCommand being used:\n".$command, TRUE);
+		  return;
+		}
 	}
 	
 	// Upload sucessful
@@ -120,7 +133,16 @@ function put_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 		// Remote path must be quoted
 		$command = '/usr/bin/scp '.(empty($PREFS['cli_options'])?'':$PREFS['cli_options']).
 							 ' '.escapeshellarg($TM_FILEPATH).' '.escapeshellarg($PREFS['user'].'@'.$PREFS['host']).':'.escapeshellarg($path).'';
+	} 
+	elseif(0 == strcasecmp('curlftp', $PREFS['protocol'])){
+
+			// Escaping spaces not nessecary because of escapeshellarg() below
+	  	$path = $PREFS['path'].$relative_dir.$TM_FILENAME;
+
+		// cURL FTP command for uploading current file
+		$command = '/usr/bin/curl '.(empty($PREFS['cli_options'])?'':$PREFS['cli_options']).' -T '.$TM_FILEPATH.' -u '.$PREFS['user'].':'.$PREFS['password'].' ftp://'.$PREFS['host'].$path;
 	}
+	
 
 	else {
 		notify('Protocol "'.$PREFS['protocol'].'" not found. Please check your .ftpssh_settings file.', STICKY);
@@ -132,9 +154,11 @@ function put_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 	$result = shell_exec($command);
 	
 	// Error occured
-	if (!empty($result)) {
-	  notify('Error ('.$PREFS['protocol'].'): '.$result."\nCommand being used:\n".$command, TRUE);
-	  return;
+	if($PREFS['protocol'] != 'curlftp'){
+		if (!empty($result)) {
+		  notify('Error ('.$PREFS['protocol'].'): '.$result."\nCommand being used:\n".$command, TRUE);
+		  return;
+		}
 	}
 	
 	// Upload sucessful
