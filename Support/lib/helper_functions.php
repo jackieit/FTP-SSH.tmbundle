@@ -63,7 +63,7 @@ function get_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 							 escapeshellarg($PREFS['user'].'@'.$PREFS['host']).':'.escapeshellarg($path).' '.escapeshellarg($TM_FILEPATH);
 	}
 	
-	elseif(0 == strcasecmp('curlftp', $PREFS['protocol'])){
+	elseif(0 == strcasecmp('curl', $PREFS['protocol'])){
 		
 		//curl -o STSServerInstaller.exe
 		$path = rawurlencode($PREFS['path'].$relative_dir.$TM_FILENAME);
@@ -84,7 +84,7 @@ function get_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 	$result = shell_exec($command);
 	
 	// Error occured
-	if($PREFS['protocol'] != 'curlftp'){
+	if($PREFS['protocol'] != 'curl'){
 		if (!empty($result)) {
 		  notify('Error ('.$PREFS['protocol'].'): '.$result."\nCommand being used:\n".$command, TRUE);
 		  return;
@@ -134,7 +134,7 @@ function put_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 		$command = '/usr/bin/scp '.(empty($PREFS['cli_options'])?'':$PREFS['cli_options']).
 							 ' '.escapeshellarg($TM_FILEPATH).' '.escapeshellarg($PREFS['user'].'@'.$PREFS['host']).':'.escapeshellarg($path).'';
 	} 
-	elseif(0 == strcasecmp('curlftp', $PREFS['protocol'])){
+	elseif(0 == strcasecmp('curl', $PREFS['protocol'])){
 
 			// Escaping spaces not nessecary because of escapeshellarg() below
 	  	$path = $PREFS['path'].$relative_dir.$TM_FILENAME;
@@ -154,7 +154,7 @@ function put_file($TM_FILENAME, $TM_FILEPATH, $TM_DIRECTORY, $PROJECT_DIR, $PREF
 	$result = shell_exec($command);
 	
 	// Error occured
-	if($PREFS['protocol'] != 'curlftp'){
+	if($PREFS['protocol'] != 'curl'){
 		if (!empty($result)) {
 		  notify('Error ('.$PREFS['protocol'].'): '.$result."\nCommand being used:\n".$command, TRUE);
 		  return;
