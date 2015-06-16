@@ -15,7 +15,32 @@ define('STICKY', TRUE);
 
 // Initialize variables
 $PROJECT_DIR = dirname(array_key_exists('TM_PROJECT_FILEPATH', $_SERVER) ? $_SERVER['TM_PROJECT_FILEPATH'] : $_ENV['TM_PROJECT_FILEPATH']);
-$PREFS_FILE = (empty($PROJECT_DIR) ? (array_key_exists('TM_DIRECTORY', $_SERVER) ? $_SERVER['TM_DIRECTORY'] : $_ENV['TM_DIRECTORY']) : $PROJECT_DIR).'/.ftpssh_settings';
+
+//
+$root_dir  = $_ENV['TM_PROJECT_DIRECTORY'];
+$root_dir  = trim(readlink($root_dir),"/");
+//echo $root_dir.PHP_EOL;
+
+$tm_dir    = $_SERVER['TM_DIRECTORY'];
+$tm_dir_arr = explode('/',$tm_dir);
+$depth = count($tm_dir_arr);
+for ($i=$depth; $i >0 ; $i--) { 
+	$new_tmp_dir_arr = array_slice($tm_dir_arr,0,$i);
+	$new_tmp_dir = implode("/",$new_tmp_dir_arr);
+	$ftp_file    = $new_tmp_dir.'/.ftpssh_settings';
+	if (is_file($ftp_file)) {
+		$PROJECT_DIR = $new_tmp_dir;
+		break;
+	}
+	if ($root_dir==$new_tmp_dir) {
+		$PROJECT_DIR = $root_dir;
+		break;
+	}
+}
+//$PROJECT_DIR = $_ENV['TM_PROJECT_DIRECTORY'];
+$PREFS_FILE   = $ftp_file;
+
+//$PREFS_FILE = (empty($PROJECT_DIR) ? (array_key_exists('TM_DIRECTORY', $_SERVER) ? $_SERVER['TM_DIRECTORY'] : $_ENV['TM_DIRECTORY']) : $PROJECT_DIR).'/.ftpssh_settings';
 $PREFS = array();
 
 // Load Settings from the project directory
